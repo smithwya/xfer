@@ -1,0 +1,140 @@
+# π-π Scattering Neural Network Training Configuration
+# All parameters are optional - CLI defaults will be used if not specified
+
+# Training Control
+#seed: 42
+num_runs: 1
+save_dir: model_checkpoints
+no_plots: False
+replica_method: gaussian
+no_replica: False
+mse_normalization: None
+mse_rel_eps: 1e-6
+
+# Adaptive Weight Balancing
+adaptive_weights: none
+data_balancing: False
+
+# Neural Network Architecture
+hidden_layers: [16, 8]
+model_arch: split
+trunk_activations: [tanh, silu]
+per_channel_heads:
+  S0:
+    phase:
+      dims: [8,4]
+      activations: [silu, silu]
+    inel:
+      dims: [8]
+      activations: [silu]
+  P1:
+    phase:
+      dims: [4,2]
+      activations: [silu,silu]
+    inel:
+      dims: [4]
+      activations: [silu]
+  S2:
+    phase:
+      dims: [4,2]
+      activations: [silu,silu]
+    inel:
+      dims: [4]
+      activations: [silu]
+  D0:
+    phase:
+      dims: [4,2]
+      activations: [silu,silu]
+    inel:
+      dims: [4]
+      activations: [silu]
+  D2:
+    phase:
+      dims: [4]
+      activations: [silu]
+  F1:
+    phase:
+      dims: [4,2]
+      activations: [silu,silu]
+    inel:
+      dims: [4]
+      activations: [silu]
+  G2:
+    phase:
+      dims: [4,2]
+      activations: [silu,silu]
+
+activation_default: silu
+residual: True
+use_threshold_factor: True
+m_pi: 0.13957
+m_k: 0.4957
+m_omega: 0.78265
+m_fake: 0.55
+subtraction_mode: learned_constrained
+
+# Partial Wave Configuration
+waves: ['S0', 'P1', 'S2', 'D0', 'D2', 'F1', 'G2']
+disable_inelasticity: ["D2", "G2"]
+
+# Experiment Data Filtering
+# include_experiments: ["S0_phase:grayer,kaminski", "P1_phase:hyams73"]
+exclude_experiments: ["S0_inelasticity:protopopescu_xiii,protopopescu_vi,kaminsky"]
+# Roy Equation Physics Parameters
+roy_energy_max: 1.1
+roy_regge_energy_min: 1.5
+roy_n_points: 120
+roy_n_sp_points: 120
+roy_n_domains: 10
+roy_regge_n_points: 200
+roy_channels: ["S0", "P1", "S2"]
+
+# Energy Ranges and Physics 
+mse_energy_range: [0.2, 1.5]  # [E_min, E_max] in GeV
+cap_barrier_factors: False
+cap_barrier_t: 6.0
+phase_barrier_k: 0.0
+inelasticity_smooth_k: 0.1
+
+
+# Curriculum Training (unified endpoints + per-phase weights)
+curriculum_epochs: [0, 300, 450, 600, 1000]
+mse_weights: [2, 2, 2, 2, 2]
+roy_weights: [0.0, 1e-03, 1e-02, 1e-01, 1.0]
+SL_weights: [0.0, 0.0, 1e-03, 1e-02, 1e-01]
+# If using mse_normalization: chi2, enable blending (0→1)
+# chi2_weights: [0.0, 0.0, 1e-02, 1e-01, 1.0]
+
+# Optimizer Settings
+optimizer: adamw
+learning_rate: 0.004
+weight_decay: 0.001
+grad_clip_norm: 1.0
+grad_clip_value: 0.5  # alternative to norm clipping, leave commented unless used
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_eps: 1e-08
+sgd_momentum: 0.9
+sgd_nesterov: False
+
+# Data Dropout Regularization
+data_dropout: 0.0
+neuron_dropout: 0.3
+
+# Learning Rate Scheduling
+lr_scheduler: plateau  # plateau, step, cosine, exponential
+lr_patience: 50  # For ReduceLROnPlateau
+lr_factor: 0.5  # Learning rate reduction factor
+lr_step_size: 100  # For StepLR scheduler
+lr_gamma: 0.1  # For StepLR/ExponentialLR
+lr_min: 1e-7  # Minimum learning rate
+
+# Early Stopping
+early_stopping: True  # Enable early stopping
+early_stopping_patience: 100  # Epochs without improvement
+early_stopping_min_delta: 1e-6  # Minimum improvement threshold
+
+# Performance Options
+device: auto
+no_amp: False
+no_compile: False
